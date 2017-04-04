@@ -6,7 +6,8 @@ public class Qualifiers {
 	private String attribute2;
 	
 	public Qualifiers(String expression){
-		expression = expression.replace("'", "");
+		System.out.println("In Qualifiers: " + expression);
+		expression = expression.replace("'", "").replace("@", " ");
 		String attribute1=null, operator=null, attribute2=null;
 		if(expression.contains(">=")){
 			String t[] = expression.split(">=");

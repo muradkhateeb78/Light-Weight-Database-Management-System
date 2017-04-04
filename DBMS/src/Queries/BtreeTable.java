@@ -7,5 +7,4 @@ public class BtreeTable {
 		this.tableName=tableName;
 		this.btree=btree;
 	}
-
 }

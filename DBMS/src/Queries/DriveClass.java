@@ -58,8 +58,8 @@ public class DriveClass {
 		oos.close();
 	}
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		DriveClass driver=new DriveClass();
-		System.out.println("AA GAYA HAY"+DBMS.databases.size());
+//		DriveClass driver=new DriveClass();
+//		System.out.println("AA GAYA HAY"+DBMS.databases.size());
 		System.out.println("Welcome to Lite Database Management System!");
 		Scanner input = new Scanner(System.in);
 		System.out.println("Start entering queries below.");
@@ -67,6 +67,9 @@ public class DriveClass {
 		String query = input.nextLine();
 		query = query.replaceAll("[ ]+"," ");
 		while(!query.equals("exit;")){
+			if(query.charAt(0) == ' '){
+				query = query.substring(1, query.length());
+			}
 			if(!query.matches("[ ]*")){
 				QueryValidator qv = new QueryValidator(query.toLowerCase());
 				if(qv.isQueryValid()){
@@ -84,6 +87,6 @@ public class DriveClass {
 		}
 		input.close();
 		System.out.println("Exiting LDBMS!");
-		driver.saveDataInHard();
+		//driver.saveDataInHard();
 	}
 }

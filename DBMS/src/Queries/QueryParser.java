@@ -116,7 +116,20 @@ public class QueryParser {
 		String whereToks[] = null;
 		for(int j = i+1; j < toks.length; j++){
 			if(!toks[j].matches("and|or")){
-				where+= toks[j].replace(" ", "");
+				if(toks[j].matches("'[a-z0-9]+")){
+					String ss = toks[j];
+					while(j < toks.length){
+						if(toks[j].matches("[a-z0-9]+'")){
+							ss+="@"+toks[j];
+							where+= ss.replace(" ", "");
+							break;
+						}
+						j++;
+					}
+					System.out.println(ss);
+				}else{
+					where+= toks[j].replace(" ", "");
+				}
 			}else{
 				where+=" "+toks[j]+" ";
 			}
