@@ -11,24 +11,29 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
  
 public class DBMSGUI{
      
-    private DBMSModel model;
+    public static DBMSModel model;
     private JFrame frame;
-    private JPanel mainPanel;
-    private JTreeAndPane treeScrollPane;
+    public static DBMSGUI myOwn;
+    public static JPanel mainPanel;
+   	public static JTreeAndPane treeScrollPane;
     public static JTextArea resultTextArea;
     public static JTextField queryTextField;
     public static JLabel errorLabel;
+    public static JTable resultTable;
+    public static    JPanel resultPanel;
  
     public DBMSGUI(DBMSModel model){
         this.model = model;
         resultTextArea = new JTextArea();
         queryTextField = new JTextField();
+        resultTable=new JTable();
         errorLabel = new JLabel("Error here...");
         setLookAndFeel();
         createPartControl();
@@ -57,6 +62,7 @@ public class DBMSGUI{
         mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
         treeScrollPane = new JTreeAndPane(this, model);
+        myOwn=this;
         JLabel catalogueLabel = new JLabel("Catalogue");
         catalogueLabel.setFont(new Font("serif", Font.PLAIN, 14));
         mainPanel.add(catalogueLabel, BorderLayout.NORTH);
@@ -94,18 +100,17 @@ public class DBMSGUI{
         errorLabel.setFont(new Font("serif", Font.PLAIN, 12));
         queryPanel.add(errorLabel, BorderLayout.SOUTH);
         
-        JPanel resultPanel = new JPanel(new BorderLayout());
+        resultPanel = new JPanel(new BorderLayout());
         JLabel resultLabel = new JLabel("Results");
         resultLabel.setOpaque(true);
         resultLabel.setBackground(Color.white);
         resultLabel.setFont(new Font("serif", Font.PLAIN, 14));
         resultPanel.add(resultLabel, BorderLayout.NORTH);
         
-        JScrollPane scrollPane = new JScrollPane(resultTextArea);
+        JScrollPane scrollPane = new JScrollPane(resultTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.gray));
         resultPanel.add(scrollPane, BorderLayout.CENTER);
         resultTextArea.setFont(new Font("serif", Font.PLAIN, 14));
-        
         queryPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         rightPanel.add(queryPanel, BorderLayout.NORTH);
         queryPanel.setBackground(Color.white);
@@ -114,9 +119,19 @@ public class DBMSGUI{
         resultPanel.setBackground(Color.white);
         rightPanel.setBorder(BorderFactory.createLineBorder(Color.gray));
         mainPanel.add(rightPanel, BorderLayout.CENTER);
+//      resultTable.setBackground(Color.lightGray);
     }
+//    public static void checking(String[][] data,String[] column){
+//    	System.err.println("Abbasi");
+//    	
+//    	JScrollPane sp=new JScrollPane(jt);
+//    	resultPanel.add(sp);
+//    	resultPanel.revalidate();
+//    	resultPanel.repaint();
+//    }
      
     public void exitProcedure(){
+    	DriveClass.performExitingTasks();
         frame.dispose();
         System.exit(0);
     }

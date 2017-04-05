@@ -16,7 +16,7 @@ public class QueryValidator {
 	private final String selectRegex = "select (\\*|([a-z]+)((,([ ]?)[a-z]+)+)?) from [a-z]+"+where;
 	private final String insertRegex = "insert into [a-z]+ values([ ]?)\\('[a-z0-9 ]+'((([ ]?),([ ]?)'[a-z0-9 ]+')+)?\\);";
 	private final String deleteRegex = "delete from [a-z]+"+where;
-	private final String updateRegex = "update [a-z]+ set [a-z]+([ ]?=[ ]?)('[a-z]+'|[0-9]+)"+where;
+	private final String updateRegex = "update [a-z]+ set [a-z]+([ ]?=[ ]?)('[a-z ]+'|[0-9]+)"+where;
 	private final String showDatabasesRegex = "show databases;";
 	private final String showTablesRegex = "show tables;";
 	private final String dropDatabase = "drop database [a-z]+;";
@@ -24,7 +24,7 @@ public class QueryValidator {
 	private final String describeTable = "describe table [a-z]+;";
 	
 	public QueryValidator(String query){
-		this.query = query;
+		this.query = query;//.replace("(=)|( =)|(= )", " = ").replace("(!=)|( !=)|(!= )", " != ").replace("(<)|( <)|(< )", " < ").replace("(>)|( >)|(> )", " > ").replace("(>=)|( >=)|(>= )", " >= ").replace("(<=)|( <=)|(<= )", " <= ");
 	}
 	
 	public boolean isQueryValid(){

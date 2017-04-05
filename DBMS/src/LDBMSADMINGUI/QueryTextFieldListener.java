@@ -4,6 +4,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import Queries.QueryParser;
+import Queries.QueryValidator;
+
 public class QueryTextFieldListener implements KeyListener, ActionListener{
 
 	public static String[] queryBuffer;
@@ -39,6 +42,7 @@ public class QueryTextFieldListener implements KeyListener, ActionListener{
 		}
 		else if((arg0.getKeyCode() == arg0.VK_ENTER)){
 			addQueryToBuffer();
+			runQuery(DBMSGUI.queryTextField.getText());
 			DBMSGUI.queryTextField.setText("");
 			indexer = queryCounter;
 		}
@@ -50,6 +54,7 @@ public class QueryTextFieldListener implements KeyListener, ActionListener{
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		addQueryToBuffer();
+		runQuery(DBMSGUI.queryTextField.getText());
 		DBMSGUI.queryTextField.setText("");
 		indexer = queryCounter;
 	}
@@ -69,5 +74,29 @@ public class QueryTextFieldListener implements KeyListener, ActionListener{
 			queryBuffer[i] = queryBuffer[i+1];
 		}
 		queryBuffer[queryBuffer.length-1] = DBMSGUI.queryTextField.getText();
+	}
+	
+	private void runQuery(String query){
+		query = query.replaceAll("[ ]+"," ");
+		System.out.println(query);
+		//while(!query.equals("exit;")){
+			if(query.charAt(0) == ' ' && query.length() > 1){
+				query = query.substring(1, query.length());
+			}
+			if(!query.matches("[ ]*")){
+				QueryValidator qv = new QueryValidator(query.toLowerCase());
+				if(qv.isQueryValid()){
+					System.out.println("Valid Query!");
+					QueryParser qp = new QueryParser(query.replaceAll(";", "").toLowerCase());
+					qp.executeQuery();
+				}else{
+					System.out.println("Invalid query!");
+					System.out.println(qv.queryError());
+					DBMSGUI.errorLabel.setText(qv.queryError());
+				}
+			}
+			System.out.print("LDBMS?-> ");
+			query = query.replaceAll("[ ]+"," ");	
+		//}
 	}
 }

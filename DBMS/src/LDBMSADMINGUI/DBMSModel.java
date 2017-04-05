@@ -16,7 +16,7 @@ public class DBMSModel {
      
     public DefaultTreeModel createTreeModel() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-        File file = new File("D:\\NAMAL");
+        File file = new File("F:\\Namal_Database_Managment_System");
         root.add(new DefaultMutableTreeNode(new DBMSNode(file)));
         addChildNodes(root);
         addGrandchildNodes(root);

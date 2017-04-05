@@ -8,6 +8,7 @@ public class QueryParser {
 	
 	public QueryParser(String query) {
 		this.query = query.replace(", ", ",").toLowerCase();
+		this.query = query.replace("=", " = ");
 	}
 	
 	public void executeQuery(){
@@ -82,12 +83,24 @@ public class QueryParser {
 	}
 	
 	private UpdateQueryTokens updateQueryTokens(){
+		query = query.replaceAll("[ ]+", " ");
 		UpdateQueryTokens uqt = new UpdateQueryTokens();
 		query = query.replaceAll(" =|= | = ", "=");
 		String toks[] = query.split(" ");
-		uqt.setRelation(toks[1]);
-		uqt.getSettingValue().add(new Qualifiers(toks[3]));
-		tokenizeWhere(uqt, 4, toks);
+		int i = 1;
+		uqt.setRelation(toks[i]);
+		String ss = "";
+		i = 3;
+		while(!toks[i].equals("where")){
+			if(!toks[i+1].equals("where")){
+				ss+=toks[i]+" ";
+			}else{
+				ss+=toks[i];
+			}
+			i++;
+		}
+		uqt.getSettingValue().add(new Qualifiers(ss));
+		tokenizeWhere(uqt, i, toks);
 		return uqt;
 	}
 	

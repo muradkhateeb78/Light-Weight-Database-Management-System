@@ -1,4 +1,6 @@
 package Queries;
+import java.awt.Color;
+import java.awt.Font;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,7 +10,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+
 import Btree.Btree;
+import LDBMSADMINGUI.DBMSGUI;
+import LDBMSADMINGUI.DriveClass;
+import LDBMSADMINGUI.JTreeAndPane;
 
 public class BTree2 {
 
@@ -43,6 +52,7 @@ public class BTree2 {
 			for(String s : dqt.getAndOr()){
 				System.out.println("AndOr: " + s);
 			}
+			deleteQuery(dqt);
 		}else if(tokens.getClass().getName().equals("Queries.UpdateQueryTokens")){
 			UpdateQueryTokens uqt = (UpdateQueryTokens) tokens;
 			System.out.println("Relation: " + uqt.getRelation());
@@ -55,6 +65,7 @@ public class BTree2 {
 			for(String s : uqt.getAndOr()){
 				System.out.println("AndOr: " + s);
 			}
+			updateQuery(uqt);
 		}else if(tokens.getClass().getName().equals("Queries.CreateTableTokens")){
 			createTable((CreateTableTokens)tokens);
 		}else if(tokens.getClass().getName().equals("java.lang.String")){
@@ -104,12 +115,12 @@ public class BTree2 {
 	private void createTable(CreateTableTokens ctt){
 		//creating Table mechanism of BTree
 		if(DriveClass.currentDatabase==null){
-			System.out.println("No database selected!");
+			DBMSGUI.errorLabel.setText("No database selected!");
 			return;
 		}
 		for(BtreeTable i:DriveClass.currentTables){
 			if(i.tableName.equals(ctt.getRelationName())){
-				System.out.println("A table with the same name already exists!");
+				DBMSGUI.errorLabel.setText("A table with the same name already exists!");
 				return;
 			}
 		}
@@ -125,21 +136,21 @@ public class BTree2 {
 		Btree btree=new Btree(ctt.getPrimaryKey(),folderPath);
 		BtreeTable bt=new BtreeTable(ctt.getRelationName(), btree);
 		DriveClass.currentTables.add(bt);
-		System.out.println("The table has been created");
+		JTreeAndPane.repaintTree();
 	}
 
 	private void createDatabase(String dbName){
-		//creating DB mechanism of BTree
-		//System.out.println("Creating Database: " + dbName);
+		
 		for(database i:DriveClass.DBMS.databases){
 			if(i.databaseName.equals(dbName)){
-				System.out.println("Database Already exists");
+				DBMSGUI.errorLabel.setText("A database with the same name already exists!");
 				return;
 			}
 		}
 		database db=new database(dbName);
 		DriveClass.DBMS.databases.add(db);
 		new File(DriveClass.workingFolder+"\\"+dbName).mkdirs();
+		DBMSGUI.treeScrollPane = new JTreeAndPane(DBMSGUI.myOwn, DBMSGUI.model);
 	}
 	public void updateRoots(){
 		if(DriveClass.currentDatabase==null){
@@ -203,7 +214,7 @@ public class BTree2 {
 				return;
 			}
 		}
-		System.out.println("No such database exists!");
+		DBMSGUI.errorLabel.setText("No such database exists!");
 	}
 
 	public boolean insertDataCorrect(InsertQueryTokens iqt,tables ct){
@@ -236,11 +247,11 @@ public class BTree2 {
 			}
 		}
 		if(correct==false){
-			System.out.println("The table does not exist!");
+			DBMSGUI.errorLabel.setText("The table does not exist!");
 			return;
 		}
 		if(DriveClass.currentDatabase == null){
-			System.out.println("No database is used!");
+			DBMSGUI.errorLabel.setText("No database was selected!");
 		}else{
 			if(insertDataCorrect(iqt,currentTable)){
 				for(BtreeTable bt:DriveClass.currentTables){
@@ -265,48 +276,48 @@ public class BTree2 {
 			}
 		}
 	}
-	public ArrayList<ArrayList> searchQuery(String tableName,ArrayList<String> attributes, ArrayList<Qualifiers> qualifiers,ArrayList<String> AndOr){
+	public ArrayList<ArrayList> searchQuery(String tableName, ArrayList<Qualifiers> qualifiers,ArrayList<String> AndOr){
 		for(BtreeTable i:DriveClass.currentTables){
 			if(tableName.equals(i.tableName)){
 				if(qualifiers.size()==0){
 					ArrayList<ArrayList> data=i.btree.selectStaric();
 					if(data==null){
-						System.out.println("There are not entries in the table!");
+						DBMSGUI.errorLabel.setText("No enteries were found in the database");
 						return null;
 					}
-					if(attributes.get(0).equals("*")){
-						return data;
-//						for(ArrayList a:data){
-//							for(Object o:a){
-//								System.out.print(o+",");
-//							}
-//							System.out.println();
-//						}
-//						return;
-					}
-					else{
-						ArrayList<Integer> arrIndex=new ArrayList<>();
-						for(tables table:DriveClass.currentDatabase.tables){
-							if(table.tableName.equals(tableName)){
-								for(int columnIndex=0;columnIndex<table.columns.length;columnIndex++){
-									for(int givendata=0;givendata<attributes.size();givendata++){
-										if(table.columns[columnIndex].columnName.equals(attributes.get(givendata))){
-											arrIndex.add(columnIndex);
-										}
-									}
-								}
-								break;
-							}
-						}
-						return data;
-//						for(int dataindex=0;dataindex<data.size();dataindex++){
-//							for(Integer datavaluesIndex:arrIndex){
-//								System.out.print(data.get(dataindex).get(datavaluesIndex)+",");
-//							}
-//							System.out.println();
-//						}
-//						return;
-					}
+					//					if(attributes.get(0).equals("*")){
+					return data;
+					//						for(ArrayList a:data){
+					//							for(Object o:a){
+					//								System.out.print(o+",");
+					//							}
+					//							System.out.println();
+					//						}
+					//						return;
+					//	}
+					//					else{
+					//						ArrayList<Integer> arrIndex=new ArrayList<>();
+					//						for(tables table:DriveClass.currentDatabase.tables){
+					//							if(table.tableName.equals(tableName)){
+					//								for(int columnIndex=0;columnIndex<table.columns.length;columnIndex++){
+					//									for(int givendata=0;givendata<attributes.size();givendata++){
+					//										if(table.columns[columnIndex].columnName.equals(attributes.get(givendata))){
+					//											arrIndex.add(columnIndex);
+					//										}
+					//									}
+					//								}
+					//								break;
+					//							}
+					//						}
+					//						return data;
+					//						for(int dataindex=0;dataindex<data.size();dataindex++){
+					//							for(Integer datavaluesIndex:arrIndex){
+					//								System.out.print(data.get(dataindex).get(datavaluesIndex)+",");
+					//							}
+					//							System.out.println();
+					//						}
+					//						return;
+					//	}
 				}
 				else{
 					tables currentTable=null;
@@ -325,6 +336,7 @@ public class BTree2 {
 					}
 					if(hasotherthanprimarykey==true){
 						ArrayList<ArrayList> data=i.btree.selectStaric();
+						ArrayList<ArrayList> dataToReturn=new ArrayList<>();
 						ArrayList<Boolean> booleansArray=null;
 						boolean result = false;
 						for(ArrayList tuple:data){
@@ -383,16 +395,21 @@ public class BTree2 {
 								result=booleansArray.get(0);
 							}
 							if(result==true){
-								data.add(tuple);
-//								for(Object a:tuple){
-//									System.out.print(a+",");
-//								}
-//								System.out.println();
+								dataToReturn.add(tuple);
+								//								for(Object a:tuple){
+								//									System.out.print(a+",");
+								//								}
+								//								System.out.println();
 							}
 							else{
 								continue;
 							}
-							return data;
+						}
+						if(dataToReturn.size()==0){
+							return null;
+						}
+						else{
+							return dataToReturn;
 						}
 					}
 					else{
@@ -420,14 +437,14 @@ public class BTree2 {
 								dataToReturn=i.btree.rangeSearchForGreaterThan(i.btree.root, 1, Integer.parseInt(qualifiers.get(0).getAttribute2()));
 							}
 							System.out.println(dataToReturn.size());
-//							for(ArrayList data: dataToReturn){
-//								System.out.println(data.size());
-//								for(Object obj:data){
-//									System.out.println(obj+",");
-//								}
-//								System.out.println();
-//							}
-//							return;
+							//							for(ArrayList data: dataToReturn){
+							//								System.out.println(data.size());
+							//								for(Object obj:data){
+							//									System.out.println(obj+",");
+							//								}
+							//								System.out.println();
+							//							}
+							//							return;
 							return dataToReturn;
 						}
 						boolean hasOtherThanEqual=false;
@@ -442,40 +459,40 @@ public class BTree2 {
 											&& qualifiers.get(1).getOperator().equals("<=")) || (qualifiers.get(0).getOperator().equals(">=")
 													&& qualifiers.get(1).getOperator().equals("<")) || (qualifiers.get(0).getOperator().equals(">=")
 															&& qualifiers.get(1).getOperator().equals("<=")))){
-									if((qualifiers.get(0).getOperator().equals(">")
-											&& qualifiers.get(1).getOperator().equals("<"))){
-										dataToReturn=i.btree.rangeSearch(i.btree.root, 0, Integer.parseInt(qualifiers.get(0).getAttribute2()),0,Integer.parseInt(qualifiers.get(1).getAttribute2()));
-									}
-									else if((qualifiers.get(0).getOperator().equals(">")
-											&& qualifiers.get(1).getOperator().equals("<="))){
-										dataToReturn=i.btree.rangeSearch(i.btree.root, 0, Integer.parseInt(qualifiers.get(0).getAttribute2()),1,Integer.parseInt(qualifiers.get(1).getAttribute2()));
-									}
-									else if((qualifiers.get(0).getOperator().equals(">=")
-											&& qualifiers.get(1).getOperator().equals("<"))){
-										dataToReturn=i.btree.rangeSearch(i.btree.root, 1, Integer.parseInt(qualifiers.get(0).getAttribute2()),0,Integer.parseInt(qualifiers.get(1).getAttribute2()));
-									}
-									if((qualifiers.get(0).getOperator().equals(">=")
-											&& qualifiers.get(1).getOperator().equals("<="))){
-										dataToReturn=i.btree.rangeSearch(i.btree.root, 1, Integer.parseInt(qualifiers.get(0).getAttribute2()),1,Integer.parseInt(qualifiers.get(1).getAttribute2()));
-									}
-//									for(ArrayList data: dataToReturn){
-//										for(Object obj:data){
-//											System.out.println(obj+",");
-//										}
-//										System.out.println();
-//									}
-//									return;
-									return dataToReturn;
+								if((qualifiers.get(0).getOperator().equals(">")
+										&& qualifiers.get(1).getOperator().equals("<"))){
+									dataToReturn=i.btree.rangeSearch(i.btree.root, 0, Integer.parseInt(qualifiers.get(0).getAttribute2()),0,Integer.parseInt(qualifiers.get(1).getAttribute2()));
+								}
+								else if((qualifiers.get(0).getOperator().equals(">")
+										&& qualifiers.get(1).getOperator().equals("<="))){
+									dataToReturn=i.btree.rangeSearch(i.btree.root, 0, Integer.parseInt(qualifiers.get(0).getAttribute2()),1,Integer.parseInt(qualifiers.get(1).getAttribute2()));
+								}
+								else if((qualifiers.get(0).getOperator().equals(">=")
+										&& qualifiers.get(1).getOperator().equals("<"))){
+									dataToReturn=i.btree.rangeSearch(i.btree.root, 1, Integer.parseInt(qualifiers.get(0).getAttribute2()),0,Integer.parseInt(qualifiers.get(1).getAttribute2()));
+								}
+								if((qualifiers.get(0).getOperator().equals(">=")
+										&& qualifiers.get(1).getOperator().equals("<="))){
+									dataToReturn=i.btree.rangeSearch(i.btree.root, 1, Integer.parseInt(qualifiers.get(0).getAttribute2()),1,Integer.parseInt(qualifiers.get(1).getAttribute2()));
+								}
+								//									for(ArrayList data: dataToReturn){
+								//										for(Object obj:data){
+								//											System.out.println(obj+",");
+								//										}
+								//										System.out.println();
+								//									}
+								//									return;
+								return dataToReturn;
 							}
 							else{
-								System.out.println("Wrong query condition.");
+								DBMSGUI.errorLabel.setText("Wrong query condition.");
 								return null;
 							}
 						}
 						else{
 							for(String s:AndOr){
 								if(s.equals("and")){
-									System.out.println("Wrong condition.");
+									DBMSGUI.errorLabel.setText("Wrong condition.");
 									return null;
 								}
 							}
@@ -485,21 +502,55 @@ public class BTree2 {
 									dataToReturn.add(arr);
 								}
 							}
-//							for(ArrayList data: dataToReturn){
-//								for(Object obj:data){
-//									System.out.println(obj+",");
-//								}
-//								System.out.println();
-//							}
-//							return;
+							//							for(ArrayList data: dataToReturn){
+							//								for(Object obj:data){
+							//									System.out.println(obj+",");
+							//								}
+							//								System.out.println();
+							//							}
+							//							return;
 							return dataToReturn;
 						}
 					}
 				}
 			}
 		}
-		System.out.println("No table found in the current database!");
+		DBMSGUI.errorLabel.setText("No table found in the current database!");
 		return null;
+	}
+	public void deleteQuery(DeleteQueryTokens dqt){
+		BtreeTable currentBtreeTable=null;
+		for(BtreeTable table : DriveClass.currentTables){
+			if(table.tableName.equals(dqt.getRelation())){
+				currentBtreeTable=table;
+				break;
+			}
+		}
+		if(currentBtreeTable==null){
+			System.out.println("there is a problem");
+		}
+		int primaryKey=-1;
+		for(tables table:DriveClass.currentDatabase.tables){
+			if(table.tableName.equals(dqt.getRelation())){
+				primaryKey=table.primarayKeyIndex;
+				break;
+			}
+		}
+		if(primaryKey==-1){
+			DBMSGUI.errorLabel.setText("No table found in the current database!");
+			return;
+		}
+		ArrayList<ArrayList> arrdata=searchQuery(dqt.getRelation(), dqt.getQualifierList(), dqt.getAndOr());
+		if(arrdata==null){
+			DBMSGUI.errorLabel.setText("No entery was found!");
+		}
+		else{
+			for(ArrayList arr: arrdata){
+				currentBtreeTable.btree.delete((Integer)arr.get(primaryKey));
+			}
+			System.out.println(arrdata.size()+" entries has been deleted!");
+			return;
+		}
 	}
 	public int mapOnIndex(tables table,String columnName){
 		for(int i=0;i<table.columns.length;i++){
@@ -510,8 +561,12 @@ public class BTree2 {
 		return 0;
 	}
 	public void dropDatabase(String dbName){
+		if(DriveClass.currentDatabase==null){
+			DBMSGUI.errorLabel.setText("No databse has been used");
+			return;
+		}
 		if(DriveClass.currentDatabase.databaseName.equals(dbName)){
-			System.out.println("This database is currently in use!");
+			DBMSGUI.errorLabel.setText("This database is currently in use!");
 			return;
 		}
 		for(int i=0;i<DriveClass.DBMS.databases.size();i++){
@@ -532,21 +587,130 @@ public class BTree2 {
 				return;
 			}
 		}
-		System.out.println("No database of this name exists");
+		DBMSGUI.errorLabel.setText("No database of this name exists");
+	}
+	public void updateQuery(UpdateQueryTokens uqt){
+		BtreeTable currentBtreeTable=null;
+		for(BtreeTable table : DriveClass.currentTables){
+			if(table.tableName.equals(uqt.getRelation())){
+				currentBtreeTable=table;
+				break;
+			}
+		}
+		int index=-1;
+		tables workingTable=null;
+		for(tables table:DriveClass.currentDatabase.tables){
+			if(table.tableName.equals(uqt.getRelation())){
+				workingTable=table;
+				index=mapOnIndex(table, uqt.getSettingValue().get(0).getAttribute1());
+				break;
+			}
+		}
+		if(index==-1){
+			DBMSGUI.errorLabel.setText("No column found!");
+		}
+		ArrayList<ArrayList> arrdata=searchQuery(uqt.getRelation(), uqt.getQualifierList(), uqt.getAndOr());
+		if(arrdata==null){
+			DBMSGUI.errorLabel.setText("No entries were found to be updated");
+		}
+		else{
+			for(ArrayList data:arrdata){
+				currentBtreeTable.btree.updateKey((Integer)data.get(workingTable.primarayKeyIndex),index, uqt.getSettingValue().get(0).getAttribute2());
+			}
+			System.out.println("Done updating "+arrdata.size()+" values");
+		}
+
+	}
+	public String[][] convertToArrays(ArrayList<ArrayList> obj){
+		String[][] data=new String[obj.size()][obj.get(0).size()];
+		for(int i=0;i<obj.size();i++){
+			for(int j=0;j<obj.get(0).size();j++){
+				Object o=obj.get(i).get(j);
+				if(o.getClass().getName().equals("java.lang.Integer")){
+					data[i][j]=Integer.toString((Integer)o);
+				}
+				else{
+					data[i][j]=(String)o;
+				}
+			}
+		}
+		return data;
+	}
+	public String[][] convertToArrays(ArrayList<Integer> columnIndexes, ArrayList<ArrayList> obj){
+		String[][] data=new String[obj.size()][obj.get(0).size()];
+		for(int i=0;i<obj.size();i++){
+			for(int j=0;j<columnIndexes.size();j++){
+				data[i][j]=(String)obj.get(i).get(columnIndexes.get(j));
+			}
+		}
+		return data;
 	}
 	public void selectQuery(SelectQueryTokens sqt){
- 		ArrayList<ArrayList> arrdata=searchQuery(sqt.getRelationList().get(0), sqt.getAttributeList(), sqt.getQualifierList(), sqt.getAndOr());
- 		if(arrdata==null){
- 			System.out.println("Nothing found");
- 		}
- 		else{
- 			for(ArrayList data:arrdata){
- 				for(Object obj:data){
- 					System.out.print(obj+",");
- 				}
- 				System.out.println();
- 			}
- 		}
+		String[][] data=null;
+		String[] column=null;
+		tables table=null;
+		ArrayList<ArrayList> arrdata=searchQuery(sqt.getRelationList().get(0), sqt.getQualifierList(), sqt.getAndOr());
+		for(tables tab:DriveClass.currentDatabase.tables){
+			if(tab.tableName.equals(sqt.getRelationList().get(0))){
+				table=tab;
+			}
+		}
+		if(arrdata==null){
+			JOptionPane.showMessageDialog(null, "No Entries were selected!");
+		}
+		else{
+			if(sqt.getAttributeList().get(0).equals("*")){
+				for(ArrayList data2:arrdata){
+					for(Object obj:data2){
+						System.out.print(obj+",");
+					}
+					System.out.println();
+				}
+				column=new String[table.columns.length];
+				for(int i=0;i<table.columns.length;i++){
+					column[i]=table.columns[i].columnName;
+				}
+				data=convertToArrays(arrdata);
+			}
+			else{
+				tables currentTable=null;
+				ArrayList<Integer> arrIndex=new ArrayList<>();
+
+				currentTable=table;
+				for(int columnIndex=0;columnIndex<table.columns.length;columnIndex++){
+					for(int givendata=0;givendata<sqt.getAttributeList().size();givendata++){
+						if(table.columns[columnIndex].columnName.equals(sqt.getAttributeList().get(givendata))){
+							arrIndex.add(columnIndex);
+						}
+					}
+				}
+
+
+
+				if(arrIndex.size()>0){
+					for(int i=0;i<arrIndex.size();i++){
+						column[i]=table.columns[arrIndex.get(i)].columnName;
+					}
+					data=convertToArrays(arrIndex,arrdata);
+				}
+				for(int dataindex=0;dataindex<arrdata.size();dataindex++){
+					for(Integer datavaluesIndex:arrIndex){
+						System.out.print(arrdata.get(dataindex).get(datavaluesIndex)+",");
+					}
+					System.out.println();
+				}
+				//TableModel dtm = new DefaultTableModel(data, column);
+
+			}
+
+		}
+		TableModel tm=new DefaultTableModel(data,column);
+		DBMSGUI.resultTable.setModel(tm);
+		DBMSGUI.resultTable.repaint();
+		DBMSGUI.resultTable.getTableHeader().setBackground(Color.decode("#42C0FB"));
+		Font f=new Font("Courier New", 16, 16);
+		DBMSGUI.resultTable.getTableHeader().setFont(f);
+		DBMSGUI.resultTable.getTableHeader().setForeground(Color.white);
 	}
 	private void deleteFolder(File f){
 		if(f.exists() && f.isDirectory()){
@@ -565,7 +729,7 @@ public class BTree2 {
 	}
 	public void dropTable(String tableName){
 		if(DriveClass.currentDatabase == null){
-			System.out.println("Please select any database to drop table from!");
+		DBMSGUI.errorLabel.setText("Please select any database to drop table from!");
 			return;
 		}
 		for(int i=0;i<DriveClass.currentDatabase.tables.size();i++){
@@ -584,7 +748,7 @@ public class BTree2 {
 				}
 			}
 		}
-		System.out.println("No such table found in current database!");
+		DBMSGUI.errorLabel.setText("No such table found in current database!");
 	}
 	public void resetDBMS(){
 		try {
@@ -603,7 +767,7 @@ public class BTree2 {
 	}
 	public void describeTable(String tableName){
 		if(DriveClass.currentDatabase == null){
-			System.out.println("Please select any database to see description of table from!");
+			DBMSGUI.errorLabel.setText("Please select any database to see description of table from!");
 			return;
 		}
 		for(tables table : DriveClass.currentDatabase.tables){
@@ -615,6 +779,6 @@ public class BTree2 {
 				return;
 			}
 		}
-		System.out.println("No such table found in current database!");
+		DBMSGUI.errorLabel.setText("No such table found in current database!");
 	}
 }

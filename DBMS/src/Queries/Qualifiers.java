@@ -6,7 +6,6 @@ public class Qualifiers {
 	private String attribute2;
 	
 	public Qualifiers(String expression){
-		System.out.println("In Qualifiers: " + expression);
 		expression = expression.replace("'", "").replace("@", " ");
 		String attribute1=null, operator=null, attribute2=null;
 		if(expression.contains(">=")){
@@ -39,6 +38,9 @@ public class Qualifiers {
 			attribute1 = t[0];
 			operator = "<";
 			attribute2 = t[1];
+		}
+		if(attribute2.charAt(0) == ' '){
+			attribute2 = attribute2.substring(1, attribute2.length());
 		}
 		this.setAttribute1(attribute1);
 		this.setOperator(operator);

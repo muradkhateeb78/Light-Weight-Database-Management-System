@@ -192,6 +192,12 @@ public class Btree implements Serializable{
 		}
 		
 	}
+	public void updateKey(int key,int index,Object newValue){
+		keyInNode k=Search(key);
+		leafNode lf=k.lNode;
+		lf.keys[k.getIndex()].set(index, newValue);
+		write_node(lf);
+	}
 	public ArrayList<ArrayList> rangeSearch(internalNode head,int flag1, int start , int flag2, int end){
 		int i=1;
 		int index;
