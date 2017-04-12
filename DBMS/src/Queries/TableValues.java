@@ -5,8 +5,8 @@ public class TableValues {
 	private String attributeType;
 	
 	public TableValues(String attributeName, String attributeType){
-		this.setAttributeName(attributeName);
-		this.setAttributeType(attributeType);
+		this.setAttributeName(attributeName.toLowerCase());
+		this.setAttributeType(attributeType.toLowerCase());
 	}
 	
 	public String getAttributeName() {

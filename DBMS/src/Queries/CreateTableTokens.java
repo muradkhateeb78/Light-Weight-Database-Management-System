@@ -16,7 +16,7 @@ public class CreateTableTokens {
 	}
 
 	public void setRelationName(String relationName) {
-		this.relationName = relationName;
+		this.relationName = relationName.toLowerCase();
 	}
 
 	public ArrayList<TableValues> getValueList() {

@@ -13,9 +13,14 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 import Btree.Btree;
 import LDBMSADMINGUI.DBMSGUI;
+import LDBMSADMINGUI.DBMSNode;
 import LDBMSADMINGUI.DriveClass;
 import LDBMSADMINGUI.JTreeAndPane;
 
@@ -73,7 +78,7 @@ public class BTree2 {
 			if(s.contains("create")){
 				createDatabase(s.substring(16, s.length()));
 			}else if(s.contains("use")){
-				useDatabase(s.substring(13, s.length()));
+				useDatabase(s.substring(13, s.length()).toLowerCase());
 			}else if(s.equals("show databases")){
 				showDatabases();
 			}else if(s.equals("show tables")){
@@ -99,7 +104,7 @@ public class BTree2 {
 	}
 	public void showTables(){
 		if(DriveClass.currentDatabase==null){
-			System.out.println("No database selected!");
+			DBMSGUI.setLabel(DBMSGUI.error, "No database selected!");
 			return;
 		}
 		else if(DriveClass.currentDatabase.tables.size()==0){
@@ -115,17 +120,18 @@ public class BTree2 {
 	private void createTable(CreateTableTokens ctt){
 		//creating Table mechanism of BTree
 		if(DriveClass.currentDatabase==null){
-			DBMSGUI.errorLabel.setText("No database selected!");
+			DBMSGUI.setLabel(DBMSGUI.error,"No database selected!");
 			return;
 		}
 		for(BtreeTable i:DriveClass.currentTables){
 			if(i.tableName.equals(ctt.getRelationName())){
-				DBMSGUI.errorLabel.setText("A table with the same name already exists!");
+				DBMSGUI.setLabel(DBMSGUI.error,"A table with the same name already exists!");
 				return;
 			}
 		}
 		String folderPath=DriveClass.workingFolder+"\\"+DriveClass.currentDatabase.databaseName+"\\"+ctt.getRelationName()+"\\";
 		new File(folderPath).mkdirs();
+		DBMSGUI.setLabel(DBMSGUI.confirmation,"The table has been created!");
 		tables tb=new tables(ctt.getRelationName(),ctt.getValueList().size(),ctt.getPrimaryKey());
 		DriveClass.currentDatabase.tables.add(tb);
 		for(int i=0;i<tb.columns.length;i++){
@@ -136,21 +142,43 @@ public class BTree2 {
 		Btree btree=new Btree(ctt.getPrimaryKey(),folderPath);
 		BtreeTable bt=new BtreeTable(ctt.getRelationName(), btree);
 		DriveClass.currentTables.add(bt);
-		JTreeAndPane.repaintTree();
+		//JTreeAndPane.repaintTree();
+		
+		File f = new File(DriveClass.workingFolder+"\\"+DriveClass.currentDatabase.databaseName+"\\"+ctt.getRelationName()+"\\");
+		DefaultTreeModel model = (DefaultTreeModel) JTreeAndPane.tree.getModel();
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+		DBMSNode node = new DBMSNode(f);
+		for(int i = 0; i < root.getFirstChild().getChildCount(); i++){
+			if(root.getFirstChild().getChildAt(i).toString().equals(DriveClass.currentDatabase.databaseName)){
+				((DefaultMutableTreeNode) root.getFirstChild().getChildAt(i)).add(new DefaultMutableTreeNode(node));
+				model.reload();
+				JTreeAndPane.tree.expandPath(new TreePath(model.getPathToRoot(root.getFirstChild().getChildAt(i))));
+
+			}
+		}
 	}
 
 	private void createDatabase(String dbName){
-		
+		dbName = dbName.toLowerCase();
 		for(database i:DriveClass.DBMS.databases){
 			if(i.databaseName.equals(dbName)){
-				DBMSGUI.errorLabel.setText("A database with the same name already exists!");
+				DBMSGUI.setLabel(DBMSGUI.error, "A database with the same name already exists!");
 				return;
 			}
 		}
 		database db=new database(dbName);
 		DriveClass.DBMS.databases.add(db);
 		new File(DriveClass.workingFolder+"\\"+dbName).mkdirs();
-		DBMSGUI.treeScrollPane = new JTreeAndPane(DBMSGUI.myOwn, DBMSGUI.model);
+		DBMSGUI.setLabel(DBMSGUI.confirmation, "The database "+dbName+" has been created!");
+		File f = new File(DriveClass.workingFolder+"\\"+dbName);
+		DefaultTreeModel model = (DefaultTreeModel) JTreeAndPane.tree.getModel();
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+		DBMSNode node = new DBMSNode(f);
+		((DefaultMutableTreeNode) root.getFirstChild()).add(new DefaultMutableTreeNode(node));
+		model.reload();
+		for(int i = 0; i < root.getFirstChild().getChildCount(); i++){
+			System.out.println(root.getFirstChild().getChildAt(i));
+		}
 	}
 	public void updateRoots(){
 		if(DriveClass.currentDatabase==null){
@@ -182,7 +210,8 @@ public class BTree2 {
 			}
 		}
 	}
-	private void useDatabase(String dbName){
+	public void useDatabase(String dbName){
+		dbName = dbName.toLowerCase();
 		updateRoots();
 		for(database i:DriveClass.DBMS.databases){
 			if(i.databaseName.equals(dbName)){
@@ -210,11 +239,22 @@ public class BTree2 {
 						DriveClass.currentTables.add(new BtreeTable(j.tableName, btree));
 					}
 				}
-				System.out.println("Database used");
+				DBMSGUI.setLabel(DBMSGUI.confirmation,"Database "+dbName+" used!");
+				DefaultTreeModel model = (DefaultTreeModel) JTreeAndPane.tree.getModel();
+				DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+				for(int ii = 0; ii < root.getFirstChild().getChildCount(); ii++){
+					if(root.getFirstChild().getChildAt(ii).toString().equals(DriveClass.currentDatabase.databaseName)){
+						JTreeAndPane.tree.expandPath(new TreePath(model.getPathToRoot(root.getFirstChild().getChildAt(ii))));
+						//return;
+					}else{
+						//changed
+						JTreeAndPane.tree.collapsePath((new TreePath(model.getPathToRoot(root.getFirstChild().getChildAt(ii)))));
+					}
+				}
 				return;
 			}
 		}
-		DBMSGUI.errorLabel.setText("No such database exists!");
+		DBMSGUI.setLabel(DBMSGUI.error, "No such database exists!");
 	}
 
 	public boolean insertDataCorrect(InsertQueryTokens iqt,tables ct){
@@ -247,15 +287,19 @@ public class BTree2 {
 			}
 		}
 		if(correct==false){
-			DBMSGUI.errorLabel.setText("The table does not exist!");
+			DBMSGUI.setLabel(DBMSGUI.error, "The table does not exist!");
 			return;
 		}
 		if(DriveClass.currentDatabase == null){
-			DBMSGUI.errorLabel.setText("No database was selected!");
+			DBMSGUI.setLabel(DBMSGUI.error, "No database was selected!");
 		}else{
 			if(insertDataCorrect(iqt,currentTable)){
 				for(BtreeTable bt:DriveClass.currentTables){
 					if(bt.tableName.equals(iqt.getRelation().toLowerCase())){
+						if(bt.btree.searchKey(Integer.parseInt(iqt.getValues().get(currentTable.primarayKeyIndex)))!=null){
+							DBMSGUI.setLabel(DBMSGUI.error, "There cannot be a duplicate primary key for a table!");
+							return;
+						}
 						ArrayList<Object> arr = new ArrayList<>();
 						for(int i = 0; i < iqt.getValues().size(); i ++){
 							if(currentTable.columns[i].columnType.equals("int")){
@@ -267,12 +311,12 @@ public class BTree2 {
 						}
 						Btree btree=bt.btree;
 						btree.insert(arr);
-						System.out.println("The data has been added successfully!");
+						DBMSGUI.setLabel(DBMSGUI.confirmation, "The data has been added successfully!");
 					}
 				}
 			}
 			else{
-				System.out.println("The data is not correct!");
+				DBMSGUI.setLabel(DBMSGUI.error, "The data is not correct!");
 			}
 		}
 	}
@@ -282,7 +326,7 @@ public class BTree2 {
 				if(qualifiers.size()==0){
 					ArrayList<ArrayList> data=i.btree.selectStaric();
 					if(data==null){
-						DBMSGUI.errorLabel.setText("No enteries were found in the database");
+						DBMSGUI.setLabel(DBMSGUI.error, "No enteries were found in the database");
 						return null;
 					}
 					//					if(attributes.get(0).equals("*")){
@@ -485,14 +529,14 @@ public class BTree2 {
 								return dataToReturn;
 							}
 							else{
-								DBMSGUI.errorLabel.setText("Wrong query condition.");
+								DBMSGUI.setLabel(DBMSGUI.error, "Wrong query condition.");
 								return null;
 							}
 						}
 						else{
 							for(String s:AndOr){
 								if(s.equals("and")){
-									DBMSGUI.errorLabel.setText("Wrong condition.");
+									DBMSGUI.setLabel(DBMSGUI.error, "Wrong condition.");
 									return null;
 								}
 							}
@@ -515,11 +559,15 @@ public class BTree2 {
 				}
 			}
 		}
-		DBMSGUI.errorLabel.setText("No table found in the current database!");
+		DBMSGUI.setLabel(DBMSGUI.error, "No table found in the current database!");
 		return null;
 	}
 	public void deleteQuery(DeleteQueryTokens dqt){
 		BtreeTable currentBtreeTable=null;
+		if(DriveClass.currentDatabase==null){
+			DBMSGUI.setLabel(DBMSGUI.error,"No database has been used!");
+			return;
+		}
 		for(BtreeTable table : DriveClass.currentTables){
 			if(table.tableName.equals(dqt.getRelation())){
 				currentBtreeTable=table;
@@ -527,7 +575,7 @@ public class BTree2 {
 			}
 		}
 		if(currentBtreeTable==null){
-			System.out.println("there is a problem");
+			DBMSGUI.setLabel(DBMSGUI.error, "there is a problem");
 		}
 		int primaryKey=-1;
 		for(tables table:DriveClass.currentDatabase.tables){
@@ -537,18 +585,18 @@ public class BTree2 {
 			}
 		}
 		if(primaryKey==-1){
-			DBMSGUI.errorLabel.setText("No table found in the current database!");
+			DBMSGUI.setLabel(DBMSGUI.error, "No table found in the current database!");
 			return;
 		}
 		ArrayList<ArrayList> arrdata=searchQuery(dqt.getRelation(), dqt.getQualifierList(), dqt.getAndOr());
 		if(arrdata==null){
-			DBMSGUI.errorLabel.setText("No entery was found!");
+			DBMSGUI.setLabel(DBMSGUI.error, "No entery was found!");
 		}
 		else{
 			for(ArrayList arr: arrdata){
 				currentBtreeTable.btree.delete((Integer)arr.get(primaryKey));
 			}
-			System.out.println(arrdata.size()+" entries has been deleted!");
+			DBMSGUI.setLabel(DBMSGUI.confirmation, arrdata.size()+" entries has been deleted!");
 			return;
 		}
 	}
@@ -561,12 +609,13 @@ public class BTree2 {
 		return 0;
 	}
 	public void dropDatabase(String dbName){
+		dbName = dbName.toLowerCase();
 		if(DriveClass.currentDatabase==null){
-			DBMSGUI.errorLabel.setText("No databse has been used");
+			DBMSGUI.setLabel(DBMSGUI.error, "No databse has been used");
 			return;
 		}
 		if(DriveClass.currentDatabase.databaseName.equals(dbName)){
-			DBMSGUI.errorLabel.setText("This database is currently in use!");
+			DBMSGUI.setLabel(DBMSGUI.error, "This database is currently in use!");
 			return;
 		}
 		for(int i=0;i<DriveClass.DBMS.databases.size();i++){
@@ -583,14 +632,27 @@ public class BTree2 {
 				f.delete();
 				DriveClass.currentDatabase=null;
 				useDatabase(currentlyUsing.databaseName);
-				System.out.println("The database has beeb droped!");
+				DBMSGUI.setLabel(DBMSGUI.confirmation, "The database "+dbName+" has been dropped!");				
+				DefaultTreeModel model = (DefaultTreeModel) JTreeAndPane.tree.getModel();
+				DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+				for(int ii = 0; ii < root.getFirstChild().getChildCount(); ii++){
+					if(root.getFirstChild().getChildAt(ii).toString().equals(dbName)){
+						model.removeNodeFromParent((DefaultMutableTreeNode)root.getFirstChild().getChildAt(ii));
+						model.reload();
+					}
+				}
+				
 				return;
 			}
 		}
-		DBMSGUI.errorLabel.setText("No database of this name exists");
+		DBMSGUI.setLabel(DBMSGUI.error, "No database of this name exists");
 	}
 	public void updateQuery(UpdateQueryTokens uqt){
 		BtreeTable currentBtreeTable=null;
+		if(DriveClass.currentDatabase==null){
+			DBMSGUI.setLabel(DBMSGUI.error,"No database has been used!");
+			return;
+		}
 		for(BtreeTable table : DriveClass.currentTables){
 			if(table.tableName.equals(uqt.getRelation())){
 				currentBtreeTable=table;
@@ -607,17 +669,17 @@ public class BTree2 {
 			}
 		}
 		if(index==-1){
-			DBMSGUI.errorLabel.setText("No column found!");
+			DBMSGUI.setLabel(DBMSGUI.error, "No column found!");
 		}
 		ArrayList<ArrayList> arrdata=searchQuery(uqt.getRelation(), uqt.getQualifierList(), uqt.getAndOr());
 		if(arrdata==null){
-			DBMSGUI.errorLabel.setText("No entries were found to be updated");
+			DBMSGUI.setLabel(DBMSGUI.error, "No entries were found to be updated");
 		}
 		else{
 			for(ArrayList data:arrdata){
 				currentBtreeTable.btree.updateKey((Integer)data.get(workingTable.primarayKeyIndex),index, uqt.getSettingValue().get(0).getAttribute2());
 			}
-			System.out.println("Done updating "+arrdata.size()+" values");
+			DBMSGUI.setLabel(DBMSGUI.confirmation, "Done updating "+arrdata.size()+" values");
 		}
 
 	}
@@ -640,7 +702,12 @@ public class BTree2 {
 		String[][] data=new String[obj.size()][obj.get(0).size()];
 		for(int i=0;i<obj.size();i++){
 			for(int j=0;j<columnIndexes.size();j++){
-				data[i][j]=(String)obj.get(i).get(columnIndexes.get(j));
+				if(obj.get(i).get(columnIndexes.get(j)).getClass().getName().equals("java.lang.Integer")){
+					data[i][j]=Integer.toString((Integer)obj.get(i).get(columnIndexes.get(j)));
+				}
+				else{
+					data[i][j]=(String)obj.get(i).get(columnIndexes.get(j));
+				}
 			}
 		}
 		return data;
@@ -649,6 +716,10 @@ public class BTree2 {
 		String[][] data=null;
 		String[] column=null;
 		tables table=null;
+		if(DriveClass.currentDatabase==null){
+			DBMSGUI.setLabel(DBMSGUI.error,"No database has been used!");
+			return;
+		}
 		ArrayList<ArrayList> arrdata=searchQuery(sqt.getRelationList().get(0), sqt.getQualifierList(), sqt.getAndOr());
 		for(tables tab:DriveClass.currentDatabase.tables){
 			if(tab.tableName.equals(sqt.getRelationList().get(0))){
@@ -660,12 +731,12 @@ public class BTree2 {
 		}
 		else{
 			if(sqt.getAttributeList().get(0).equals("*")){
-				for(ArrayList data2:arrdata){
-					for(Object obj:data2){
-						System.out.print(obj+",");
-					}
-					System.out.println();
-				}
+//				for(ArrayList data2:arrdata){
+//					for(Object obj:data2){
+//						System.out.print(obj+",");
+//					}
+//					System.out.println();
+//				}
 				column=new String[table.columns.length];
 				for(int i=0;i<table.columns.length;i++){
 					column[i]=table.columns[i].columnName;
@@ -684,21 +755,21 @@ public class BTree2 {
 						}
 					}
 				}
+				column=new String[arrIndex.size()];
 
-
-
+				System.out.println(arrIndex.size());
 				if(arrIndex.size()>0){
 					for(int i=0;i<arrIndex.size();i++){
 						column[i]=table.columns[arrIndex.get(i)].columnName;
 					}
 					data=convertToArrays(arrIndex,arrdata);
 				}
-				for(int dataindex=0;dataindex<arrdata.size();dataindex++){
-					for(Integer datavaluesIndex:arrIndex){
-						System.out.print(arrdata.get(dataindex).get(datavaluesIndex)+",");
-					}
-					System.out.println();
-				}
+//				for(int dataindex=0;dataindex<arrdata.size();dataindex++){
+//					for(Integer datavaluesIndex:arrIndex){
+//						System.out.print(arrdata.get(dataindex).get(datavaluesIndex)+",");
+//					}
+//					System.out.println();
+//				}
 				//TableModel dtm = new DefaultTableModel(data, column);
 
 			}
@@ -728,9 +799,10 @@ public class BTree2 {
 		}
 	}
 	public void dropTable(String tableName){
+		tableName = tableName.toLowerCase();
 		if(DriveClass.currentDatabase == null){
-		DBMSGUI.errorLabel.setText("Please select any database to drop table from!");
-			return;
+		DBMSGUI.setLabel(DBMSGUI.error, "Please select any database to drop table from!");
+		return;
 		}
 		for(int i=0;i<DriveClass.currentDatabase.tables.size();i++){
 			tables table=DriveClass.currentDatabase.tables.get(i);
@@ -742,13 +814,27 @@ public class BTree2 {
 					BtreeTable btable=DriveClass.currentTables.get(i);
 					if(btable.tableName.equals(tableName)){
 						DriveClass.currentTables.remove(j);
-						System.out.println("Deleted");
+						DBMSGUI.setLabel(DBMSGUI.confirmation, "The requested table has been deleted!");
+						DefaultTreeModel model = (DefaultTreeModel) JTreeAndPane.tree.getModel();
+						DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+						for(int ii = 0; ii < root.getFirstChild().getChildCount(); ii++){
+							if(root.getFirstChild().getChildAt(ii).toString().equals(DriveClass.currentDatabase.databaseName)){
+								for(int jj = 0; jj < root.getFirstChild().getChildAt(ii).getChildCount(); jj++){
+									if(root.getFirstChild().getChildAt(ii).getChildAt(jj).toString().equals(tableName)){
+										model.removeNodeFromParent((DefaultMutableTreeNode)root.getFirstChild().getChildAt(ii).getChildAt(jj));
+										model.reload();
+										JTreeAndPane.tree.expandPath(new TreePath(model.getPathToRoot(root.getFirstChild().getChildAt(ii))));
+										return;
+									}
+								}
+							}
+						}
 						return;
 					}
 				}
 			}
 		}
-		DBMSGUI.errorLabel.setText("No such table found in current database!");
+		DBMSGUI.setLabel(DBMSGUI.error, "No such table found in current database!");
 	}
 	public void resetDBMS(){
 		try {
@@ -766,19 +852,33 @@ public class BTree2 {
 
 	}
 	public void describeTable(String tableName){
+		String column[]=null;
+		String data[][]=null;
 		if(DriveClass.currentDatabase == null){
-			DBMSGUI.errorLabel.setText("Please select any database to see description of table from!");
+			DBMSGUI.setLabel(DBMSGUI.error, "Please select any database to see description of table from!");
 			return;
 		}
 		for(tables table : DriveClass.currentDatabase.tables){
 			if(table.tableName.equals(tableName)){
-				for(column c: table.columns){
-					System.out.print(c.columnName+","+c.columnType+"****");
-				}
-				System.out.println();
+				column=new String[table.columns.length];
+					data=new String[1][table.columns.length];
+					for(int i=0;i<table.columns.length;i++){
+						column[i]=table.columns[i].columnName;
+						String s=table.columns[i].columnType;
+						if(s.equals("int"))s="Integer";
+						else s="String";
+						data[0][i]=s;
+					}
+					TableModel tm=new DefaultTableModel(data,column);
+					DBMSGUI.resultTable.setModel(tm);
+					DBMSGUI.resultTable.repaint();
+					DBMSGUI.resultTable.getTableHeader().setBackground(Color.decode("#42C0FB"));
+					Font f=new Font("Courier New", 16, 16);
+					DBMSGUI.resultTable.getTableHeader().setFont(f);
+					DBMSGUI.resultTable.getTableHeader().setForeground(Color.white);
 				return;
 			}
 		}
-		DBMSGUI.errorLabel.setText("No such table found in current database!");
+		DBMSGUI.setLabel(DBMSGUI.error, "No such table found in current database!");
 	}
 }

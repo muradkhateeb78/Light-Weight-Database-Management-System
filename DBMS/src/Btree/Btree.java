@@ -20,6 +20,7 @@ public class Btree implements Serializable{
 	private int arrayCounter=1;
 	private String filePath;
 	public ArrayList<Object> searchKey(int key){
+		if(this.root==null)return null;
 		keyInNode k=Search(key);
 		if(k==null){
 			System.out.println("The requested key does not exist in the data!");

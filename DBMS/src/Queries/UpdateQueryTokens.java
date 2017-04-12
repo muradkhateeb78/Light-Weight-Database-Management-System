@@ -18,7 +18,7 @@ public class UpdateQueryTokens {
 		return relation;
 	}
 	public void setRelation(String relation) {
-		this.relation = relation;
+		this.relation = relation.toLowerCase();
 	}
 	public ArrayList<Qualifiers> getQualifierList() {
 		return qualifierList;

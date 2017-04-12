@@ -4,6 +4,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+
 import Queries.QueryParser;
 import Queries.QueryValidator;
 
@@ -24,27 +30,34 @@ public class QueryTextFieldListener implements KeyListener, ActionListener{
 	
 	@Override
 	public void keyReleased(KeyEvent arg0) {
-		if(arg0.getKeyCode() == arg0.VK_DOWN){
-			if(indexer <= queryCounter){
-				DBMSGUI.queryTextField.setText(queryBuffer[indexer++]);
+		try{
+			if(arg0.getKeyCode() == arg0.VK_DOWN){
+				if(indexer <= queryCounter){
+					DBMSGUI.queryTextField.setText(queryBuffer[indexer++]);
+				}
+				else if(indexer == queryCounter+1){
+					indexer = queryCounter;
+					DBMSGUI.queryTextField.setText("");
+				}
+			}else if(arg0.getKeyCode() == arg0.VK_UP){
+				if(indexer >= 0){
+					DBMSGUI.queryTextField.setText(queryBuffer[indexer--]);
+				}
+				if(indexer == -1){
+					indexer = 0;
+				}
 			}
-			else if(indexer == queryCounter+1){
-				indexer = queryCounter;
+			else if((arg0.getKeyCode() == arg0.VK_ENTER)){
+				TableModel tm=new DefaultTableModel(0,0);
+				DBMSGUI.resultTable.setModel(tm);
+				DBMSGUI.resultTable.repaint();
+				addQueryToBuffer();
+				runQuery(DBMSGUI.queryTextField.getText());
 				DBMSGUI.queryTextField.setText("");
+				indexer = queryCounter;
 			}
-		}else if(arg0.getKeyCode() == arg0.VK_UP){
-			if(indexer >= 0){
-				DBMSGUI.queryTextField.setText(queryBuffer[indexer--]);
-			}
-			if(indexer == -1){
-				indexer = 0;
-			}
-		}
-		else if((arg0.getKeyCode() == arg0.VK_ENTER)){
-			addQueryToBuffer();
-			runQuery(DBMSGUI.queryTextField.getText());
-			DBMSGUI.queryTextField.setText("");
-			indexer = queryCounter;
+		}catch(IndexOutOfBoundsException ioobe){
+			System.out.println("Index Exception.");
 		}
 	}
 	
@@ -53,6 +66,9 @@ public class QueryTextFieldListener implements KeyListener, ActionListener{
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
+		TableModel tm=new DefaultTableModel(0,0);
+		DBMSGUI.resultTable.setModel(tm);
+		DBMSGUI.resultTable.repaint();
 		addQueryToBuffer();
 		runQuery(DBMSGUI.queryTextField.getText());
 		DBMSGUI.queryTextField.setText("");
@@ -80,19 +96,25 @@ public class QueryTextFieldListener implements KeyListener, ActionListener{
 		query = query.replaceAll("[ ]+"," ");
 		System.out.println(query);
 		//while(!query.equals("exit;")){
-			if(query.charAt(0) == ' ' && query.length() > 1){
-				query = query.substring(1, query.length());
-			}
+			
 			if(!query.matches("[ ]*")){
+				if(query.charAt(0) == ' ' && query.length() > 0){
+					query = query.substring(1, query.length());
+				}
 				QueryValidator qv = new QueryValidator(query.toLowerCase());
 				if(qv.isQueryValid()){
 					System.out.println("Valid Query!");
-					QueryParser qp = new QueryParser(query.replaceAll(";", "").toLowerCase());
+					QueryParser qp = new QueryParser(query.replaceAll(";", ""));
 					qp.executeQuery();
+					DefaultTreeModel model = (DefaultTreeModel) JTreeAndPane.tree.getModel();
+					DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+					JTreeAndPane.tree.expandPath(new TreePath(model.getPathToRoot(root.getChildAt(0))));
 				}else{
 					System.out.println("Invalid query!");
 					System.out.println(qv.queryError());
 					DBMSGUI.errorLabel.setText(qv.queryError());
+					String error = qv.queryError();
+					DBMSGUI.setLabel(DBMSGUI.error, error);
 				}
 			}
 			System.out.print("LDBMS?-> ");

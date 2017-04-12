@@ -7,7 +7,7 @@ public class JTreeAndPane {
  
     private DBMSModel model;
     private JScrollPane scrollPane;
-    private static JTree tree;
+    public static JTree tree;
  
     public JTreeAndPane(DBMSGUI frame, DBMSModel model) {
         this.model = model;

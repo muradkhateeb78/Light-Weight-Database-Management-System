@@ -3,9 +3,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -20,6 +26,8 @@ public class DBMSGUI{
      
     public static DBMSModel model;
     private JFrame frame;
+    public static String confirmation="confirmation";
+    public static String error="error";
     public static DBMSGUI myOwn;
     public static JPanel mainPanel;
    	public static JTreeAndPane treeScrollPane;
@@ -34,7 +42,7 @@ public class DBMSGUI{
         resultTextArea = new JTextArea();
         queryTextField = new JTextField();
         resultTable=new JTable();
-        errorLabel = new JLabel("Error here...");
+        errorLabel = new JLabel(" ");
         setLookAndFeel();
         createPartControl();
     }
@@ -42,7 +50,7 @@ public class DBMSGUI{
     private void createPartControl(){  
         frame = new JFrame();
         frame.getContentPane().setBackground(Color.white);
-        frame.setTitle("L-Admin");
+        frame.setTitle("Admin");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -54,10 +62,22 @@ public class DBMSGUI{
         frame.add(mainPanel);
         frame.pack();
         frame.setSize(1000, 600);
+        ImageIcon i=new ImageIcon("Files\\icon.png");
+        frame.setIconImage(i.getImage());
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
- 
+    public static void setLabel(String indication, String value){
+    	if(indication.equals(confirmation)){
+    		errorLabel.setForeground(Color.decode("#008000"));
+    		errorLabel.setText("Result: " + value);
+    	}
+    	else if(indication.equals(error)){
+    		errorLabel.setForeground(Color.red);
+    		errorLabel.setText("Error: " + value);
+    	}
+    	
+    }
     private void createMainPanel(){
         mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
@@ -97,7 +117,7 @@ public class DBMSGUI{
         errorLabel.setOpaque(true);
         errorLabel.setBackground(Color.white);
         errorLabel.setForeground(Color.red);
-        errorLabel.setFont(new Font("serif", Font.PLAIN, 12));
+        errorLabel.setFont(new Font("serif", Font.PLAIN, 14));
         queryPanel.add(errorLabel, BorderLayout.SOUTH);
         
         resultPanel = new JPanel(new BorderLayout());

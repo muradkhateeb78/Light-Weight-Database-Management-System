@@ -14,6 +14,7 @@ import javax.swing.SwingUtilities;
 import Queries.BTree2;
 import Queries.BtreeTable;
 import Queries.Catalogue;
+import Queries.InsertQueryTokens;
 import Queries.QueryParser;
 import Queries.QueryValidator;
 import Queries.database;
@@ -44,7 +45,32 @@ public class DriveClass implements Runnable {
 		oos.writeObject(DBMS);
 		oos.close();
 	}
-	
+	public static void populateData(){
+		File f=new File("Students.txt");
+		BTree2 btree=new BTree2();
+		btree.useDatabase("namal");
+		//int x=0;
+		try {
+			Scanner input=new Scanner(f);
+			while(input.hasNextLine()){
+				InsertQueryTokens iqt=new InsertQueryTokens();
+				iqt.setRelation("students");
+				ArrayList<String> arrvalues=new ArrayList<>();
+				String data=input.nextLine();
+				String[] tokens=data.split(",");
+				for(String s:tokens){
+					arrvalues.add(s);
+				}
+				iqt.setValues(arrvalues);
+				btree.insertData(iqt);
+				//x++;
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//System.out.println(x);
+	}
 	private void initializeDBMS(){
 		try {
 			File f=new File(workingFolder+"\\metadata.dat");
@@ -67,7 +93,7 @@ public class DriveClass implements Runnable {
         System.out.println(DriveClass.currentDatabase);
     }
      
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         SwingUtilities.invokeLater(new DriveClass());
     }
 }

@@ -7,7 +7,8 @@ public class QueryParser {
 	private Object objectTokens;
 	
 	public QueryParser(String query) {
-		this.query = query.replace(", ", ",").toLowerCase();
+//		this.query = query.replace(", ", ",").toLowerCase();
+		this.query = query.replace(", ", ",");
 		this.query = query.replace("=", " = ");
 	}
 	
@@ -18,43 +19,45 @@ public class QueryParser {
 	}
 	
 	private void tokenize(){
-		if(query.regionMatches(0, "select", 0, 6)){
+		if(query.toLowerCase().regionMatches(0, "select", 0, 6)){
 			objectTokens = selectQueryTokens();
-		}else if(query.regionMatches(0, "insert", 0, 6)){
+		}else if(query.toLowerCase().regionMatches(0, "insert", 0, 6)){
 			objectTokens = insertQueryTokens();
-		}else if(query.regionMatches(0, "delete", 0, 6)){
+		}else if(query.toLowerCase().regionMatches(0, "delete", 0, 6)){
 			objectTokens = deleteQueryTokens();
-		}else if(query.regionMatches(0, "update", 0, 6)){
+		}else if(query.toLowerCase().regionMatches(0, "update", 0, 6)){
 			objectTokens = updateQueryTokens();
-		}else if(query.regionMatches(0, "create table", 0, 12)){
+		}else if(query.toLowerCase().regionMatches(0, "create table", 0, 12)){
 			objectTokens = createTableTokens();
-		}else if(query.regionMatches(0, "create database", 0, 15)){
+		}else if(query.toLowerCase().regionMatches(0, "create database", 0, 15)){
 			objectTokens = query;
-		}else if(query.regionMatches(0, "use database", 0, 12)){
+		}else if(query.toLowerCase().regionMatches(0, "use database", 0, 12)){
 			objectTokens = query;
-		}else if(query.equals("show databases")){
+		}else if(query.toLowerCase().equals("show databases")){
 			objectTokens = query;
-		}else if(query.equals("show tables")){
+		}else if(query.toLowerCase().equals("show tables")){
 			objectTokens = query;
-		}else if(query.contains("drop database") || query.contains("drop table") || query.contains("describe table")){
+		}else if(query.toLowerCase().contains("drop database") || query.toLowerCase().contains("drop table") || query.toLowerCase().contains("describe table")){
 			objectTokens = query;
 		}
 	}
 	
 	private SelectQueryTokens selectQueryTokens(){
 		SelectQueryTokens sqt = new SelectQueryTokens();
+		query = query.replace(", ", ",");
 		String tokens[] = query.split(" ");
 		int i = 0;
 		i++;
 		String tokens2[] = tokens[i].replace(", ", ",").split(",");
 		for(int j = 0; j < tokens2.length; j++){
-			sqt.getAttributeList().add(tokens2[j]);
+			System.out.println(tokens2[j]);
+			sqt.getAttributeList().add(tokens2[j].toLowerCase());
 		}
 		i++;
 		i++;
-		sqt.getRelationList().add(tokens[i]);
+		sqt.getRelationList().add(tokens[i].toLowerCase());
 		i++;
-		if(i < tokens.length && tokens[i].equals("where")){
+		if(i < tokens.length && tokens[i].toLowerCase().equals("where")){
 			tokenizeWhere((Object)sqt, i++, tokens);
 		}
 		return sqt;
@@ -62,9 +65,9 @@ public class QueryParser {
 	
 	private InsertQueryTokens insertQueryTokens(){
 		InsertQueryTokens iqt = new InsertQueryTokens();
-		query = query.replace(", ", ",").replace("values(", "values (").replace(";", "");
+		query = query.replace(", ", ",").replace(("values(").toLowerCase(), "values (").replace(";", "");
 		String toks[] = query.split(" ");
-		iqt.setRelation(toks[2]);
+		iqt.setRelation(toks[2].toLowerCase());
 		String s = query.substring(query.indexOf('('), query.indexOf(')')+1);
 		s = s.replace("(", "").replace(")", "").replace("'", "");
 		String[] stoks = s.split(",");
@@ -77,7 +80,7 @@ public class QueryParser {
 	private DeleteQueryTokens deleteQueryTokens(){
 		DeleteQueryTokens dqt = new DeleteQueryTokens();
 		String tokens[] = query.split(" ");
-		dqt.setRelation(tokens[2]);
+		dqt.setRelation(tokens[2].toLowerCase());
 		tokenizeWhere(dqt, 3, tokens);
 		return dqt;
 	}
@@ -88,11 +91,11 @@ public class QueryParser {
 		query = query.replaceAll(" =|= | = ", "=");
 		String toks[] = query.split(" ");
 		int i = 1;
-		uqt.setRelation(toks[i]);
+		uqt.setRelation(toks[i].toLowerCase());
 		String ss = "";
 		i = 3;
-		while(!toks[i].equals("where")){
-			if(!toks[i+1].equals("where")){
+		while(!toks[i].toLowerCase().equals("where")){
+			if(!toks[i+1].toLowerCase().equals("where")){
 				ss+=toks[i]+" ";
 			}else{
 				ss+=toks[i];
@@ -109,7 +112,7 @@ public class QueryParser {
 		query = query.replace(", ", ",").replace("' ", "'#").replace("(", " ").replace(")", "");
 		query = query.replaceAll("[ ]+"," ");
 		String toks[] = query.split(" ");
-		ctt.setRelationName(toks[2]);
+		ctt.setRelationName(toks[2].toLowerCase());
 		String toks2[] = toks[3].split(",");
 		String pk = toks[toks.length-1];
 		int pkIndex = 0;
@@ -128,17 +131,21 @@ public class QueryParser {
 		String where = "";
 		String whereToks[] = null;
 		for(int j = i+1; j < toks.length; j++){
-			if(!toks[j].matches("and|or")){
-				if(toks[j].matches("'[a-z0-9]+")){
+			if(!toks[j].toLowerCase().matches("and|or")){
+				if(toks[j].toLowerCase().matches("'[a-z0-9]+")){
 					String ss = toks[j];
 					while(j < toks.length){
-						if(toks[j].matches("[a-z0-9]+'")){
-							ss+="@"+toks[j];
-							where+= ss.replace(" ", "");
-							break;
-						}
 						j++;
+						if(toks[j].toLowerCase().matches("[a-z0-9]+'")){
+							ss+="@"+toks[j];
+							//where+= ss.replace(" ", "");
+							break;
+						}else{
+							ss+="@"+toks[j];
+//							where+= ss.replace(" ", "");
+						}
 					}
+					where+= ss.replace(" ", "");
 					System.out.println(ss);
 				}else{
 					where+= toks[j].replace(" ", "");
@@ -152,7 +159,7 @@ public class QueryParser {
 			case "Queries.SelectQueryTokens":
 				SelectQueryTokens queryClass = (SelectQueryTokens) tokens;
 				for(int j = 0; j < whereToks.length; j++){
-					if(whereToks[j].matches("and|or")){
+					if(whereToks[j].toLowerCase().matches("and|or")){
 						queryClass.getAndOr().add(whereToks[j]);
 					}else{
 						queryClass.getQualifierList().add(new Qualifiers(whereToks[j]));
@@ -162,7 +169,7 @@ public class QueryParser {
 			case "Queries.DeleteQueryTokens":
 				DeleteQueryTokens queryClass1 = (DeleteQueryTokens) tokens;
 				for(int j = 0; j < whereToks.length; j++){
-					if(whereToks[j].matches("and|or")){
+					if(whereToks[j].toLowerCase().matches("and|or")){
 						queryClass1.getAndOr().add(whereToks[j]);
 					}else{
 						queryClass1.getQualifierList().add(new Qualifiers(whereToks[j]));
@@ -172,7 +179,7 @@ public class QueryParser {
 			case "Queries.UpdateQueryTokens":
 				UpdateQueryTokens queryClass2 = (UpdateQueryTokens) tokens;
 				for(int j = 0; j < whereToks.length; j++){
-					if(whereToks[j].matches("and|or")){
+					if(whereToks[j].toLowerCase().matches("and|or")){
 						queryClass2.getAndOr().add(whereToks[j]);
 					}else{
 						queryClass2.getQualifierList().add(new Qualifiers(whereToks[j]));
