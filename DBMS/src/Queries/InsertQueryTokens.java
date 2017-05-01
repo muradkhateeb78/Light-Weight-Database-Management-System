@@ -2,6 +2,10 @@ package Queries;
 import java.util.ArrayList;
 
 public class InsertQueryTokens {
+	
+	/*
+	 * This class holds the tokens of the insert query which is parsed in the QueryParser class.
+	 */
 
 	private String relation;
 	private ArrayList<String> values;

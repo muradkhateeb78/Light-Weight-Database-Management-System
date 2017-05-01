@@ -1,5 +1,9 @@
 package Queries;
 public class Qualifiers {
+	
+	/*
+	 * This class contains the tokens of the where clause which is parsed in the QueryParser class.
+	 */
 
 	private String attribute1;
 	private String operator;

@@ -2,6 +2,10 @@ package Queries;
 import java.util.ArrayList;
 
 public class DeleteQueryTokens {
+	
+	/*
+	 * This class holds the tokens of the delete query which is parsed in the QueryParser class.
+	 */
 
 	private String relation;
 	private ArrayList<Qualifiers> qualifierList;

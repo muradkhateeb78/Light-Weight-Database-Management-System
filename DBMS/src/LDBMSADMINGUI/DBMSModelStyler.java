@@ -11,6 +11,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeCellRenderer;
 
 public class DBMSModelStyler implements TreeCellRenderer {
+	
+	/*
+	 * This class sets the look of the JTree catalogue. It sets the icons and fonts. It also sets what background
+	 * colors to appear when any of the node of JTree catalogue is clicked.
+	 */
 
 	private DBMSModel model;
 	private JLabel label;
@@ -30,8 +35,7 @@ public class DBMSModelStyler implements TreeCellRenderer {
 		ImageIcon imageIcon = null;
 		if(fileNode != null){
 			File file = fileNode.getFile();
-			//label.setIcon(model.getFileIcon(file));
-			if(node.isLeaf() && !node.getParent().toString().equals("Namal_Database_Managment_System")){
+			if(node.isLeaf() && !node.getParent().toString().equals(DriveClass.folderOfDatabase)){
 				imageIcon = new ImageIcon(new ImageIcon("Files\\table.png").getImage().getScaledInstance(17, 15, Image.SCALE_DEFAULT));
 			}
 			else{

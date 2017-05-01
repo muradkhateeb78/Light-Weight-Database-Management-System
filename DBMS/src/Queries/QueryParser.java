@@ -2,12 +2,18 @@ package Queries;
 import Queries.BTree2;
 
 public class QueryParser {
+	
+	/*
+	 * This class is one of the important classes of our project. It parsers the queries after the validation
+	 * which is done in the QueryValidator class. It parsers each and every query of accepted by our system
+	 * and make tokens for each of the query related class and send to the backend BTree to work the desired 
+	 * action out.
+	 */
 
 	private String query;
 	private Object objectTokens;
 
 	public QueryParser(String query) {
-		//		this.query = query.replace(", ", ",").toLowerCase();
 		this.query = query.replace(", ", ",");
 		this.query = query.replace("=", " = ");
 	}

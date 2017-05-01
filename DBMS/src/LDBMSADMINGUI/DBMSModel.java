@@ -8,6 +8,11 @@ import javax.swing.tree.DefaultTreeModel;
 
 public class DBMSModel {
 
+	/*
+	 * This class basically creates the JTree. Adding the nodes by looking into the file system views. It adds
+	 * all the folders and sub-folders into the JTree catalogue of the workingFolder path that the user provides.
+	 */
+	
 	private FileSystemView fileSystemView;
 
 	public DBMSModel() {

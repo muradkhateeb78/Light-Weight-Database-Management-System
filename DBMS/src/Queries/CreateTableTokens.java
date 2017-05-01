@@ -3,6 +3,10 @@ import java.util.ArrayList;
 
 public class CreateTableTokens {
 
+	/*
+	 * This class holds the tokens of the create table query which is parsed in the QueryParser class.
+	 */
+	
 	private String relationName;
 	private ArrayList<TableValues> valueList;
 	private int primaryKey;

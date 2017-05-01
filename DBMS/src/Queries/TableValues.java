@@ -1,5 +1,9 @@
 package Queries;
 public class TableValues {
+	
+	/*
+	 * This class contains the information of the attributes of the table and their data type.
+	 */
 
 	private String attributeName;
 	private String attributeType;

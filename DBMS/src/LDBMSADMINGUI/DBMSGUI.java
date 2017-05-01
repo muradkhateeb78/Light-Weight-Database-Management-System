@@ -37,6 +37,12 @@ import Queries.InsertQueryTokens;
 import Queries.database;
 
 public class DBMSGUI{
+	
+	/*
+	 * This class creates all the GUI of the LDBMS. Adding frames, panels, table, textfield, JTree, buttons.
+	 * Everything of the GUI part is done in this class. This is a very simple and basic class. Everyone can
+	 * easily understand this class and the construction of the GUI of our LDBMS.
+	 */
 
 	public static DBMSModel model;
 	private JFrame frame;
@@ -56,7 +62,6 @@ public class DBMSGUI{
 		resultTextArea = new JTextArea();
 		queryTextField = new JTextField();
 		resultTable=new JTable();
-		//        resultTable.setAutoResizeMode(resultTable.AUTO_RESIZE_OFF);
 		resultTable.setEnabled(false);
 		errorLabel = new JLabel(" ");
 		setLookAndFeel();
@@ -78,8 +83,6 @@ public class DBMSGUI{
 		frame.add(mainPanel);
 		frame.pack();
 		frame.setSize(1000, 600);
-		//        resultTable.setPreferredScrollableViewportSize(new Dimension(frame.getWidth(), frame.getHeight()));
-		//        resultTable.setFillsViewportHeight(true);
 		ImageIcon i=new ImageIcon("Files\\icon.png");
 		frame.setIconImage(i.getImage());
 		frame.setLocationRelativeTo(null);
@@ -179,18 +182,9 @@ public class DBMSGUI{
 		resultPanel.setBackground(Color.white);
 		rightPanel.setBorder(BorderFactory.createLineBorder(Color.gray));
 		mainPanel.add(rightPanel, BorderLayout.CENTER);
-		//      resultTable.setBackground(Color.lightGray);
 	}
-	//    public static void checking(String[][] data,String[] column){
-	//    	System.err.println("Abbasi");
-	//    	
-	//    	JScrollPane sp=new JScrollPane(jt);
-	//    	resultPanel.add(sp);
-	//    	resultPanel.revalidate();
-	//    	resultPanel.repaint();
-	//    }
 	public String chooseFile(){
-		long abbasi=34;
+//		long abbasi=34;
 		String s="";
 		JFileChooser jfc=new JFileChooser();
 		jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -207,7 +201,6 @@ public class DBMSGUI{
 		File f=new File(fileName);
 		BTree2 btree=new BTree2();
 		btree.useDatabase(databaseName);
-		//int x=0;
 		try {
 			Scanner input=new Scanner(f);
 			while(input.hasNextLine()){
@@ -221,13 +214,10 @@ public class DBMSGUI{
 				}
 				iqt.setValues(arrvalues);
 				btree.insertData(iqt);
-				//x++;
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//System.out.println(x);
 	}
 	public void exitProcedure(){
 		DriveClass.performExitingTasks();

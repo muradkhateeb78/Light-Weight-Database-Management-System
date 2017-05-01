@@ -22,11 +22,15 @@ import Queries.database;
 public class DriveClass implements Runnable {
 
 	/*
-	 * This should be the name of your starting folder. All of your databases and tables
-	 * folders and all the files will be stored over here.
+	 * This class initializes and runs the thread of the our LDBMS. It also acts as constructor of the LDBMS and
+	 * also destructor when the close button is pressed.
+	 * 
+	 * workingFolder should be the address of your starting folder. All of your databases and tables
+	 * folders and all the files will be stored in the workingFolder path that you provide.
 	 */
 
-	public static final String workingFolder="F:\\Namal_Database_Managment_System";
+	public static final String workingFolder="E:\\DBMS";
+	public static final String folderOfDatabase = workingFolder.substring(workingFolder.lastIndexOf("\\")+1);
 	public static Catalogue DBMS;
 	public static database currentDatabase=null;
 	public static ArrayList<BtreeTable> currentTables=new ArrayList<>();

@@ -3,6 +3,11 @@ import java.io.File;
 
 public class DBMSNode {
 
+	/*
+	 * This class acts as the node class of the JTree, our catalogue. It helps in the rendering of the JTree where
+	 * each node item is represented as DBMSNode.
+	 */
+	
 	private boolean generateGrandchildren;
 	private File file;
 

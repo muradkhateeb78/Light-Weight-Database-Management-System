@@ -2,6 +2,10 @@ package Queries;
 import java.util.ArrayList;
 
 public class UpdateQueryTokens {
+	
+	/*
+	 * This class holds the tokens of the update query which is parsed in the QueryParser class.
+	 */
 
 	private String relation;
 	private ArrayList<Qualifiers> settingValue;

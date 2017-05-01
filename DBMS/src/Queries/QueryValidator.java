@@ -3,6 +3,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QueryValidator {
+	
+	/*
+	 * This class contains the general regexes of all the queries that we want our database system to accept
+	 * and execute. This class validates the query.
+	 */
+	
 	private String query;
 	private final String createDBRegex = "create database [a-z_]+;";
 	private final String createTableRegex = "create table [a-z_]+([ ]?)\\((([ ]?)'[a-z_]+' (int|string)((,([ ]?)'[a-z_]+' "

@@ -2,6 +2,10 @@ package Queries;
 import java.util.ArrayList;
 
 public class SelectQueryTokens {
+	
+	/*
+	 * This class holds the tokens of the select query which is parsed in the QueryParser class.
+	 */
 
 	private ArrayList<String> attributeList;
 	private ArrayList<String> relationList;

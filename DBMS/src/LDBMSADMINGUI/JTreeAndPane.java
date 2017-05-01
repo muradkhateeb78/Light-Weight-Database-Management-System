@@ -5,6 +5,11 @@ import javax.swing.JTree;
 
 public class JTreeAndPane {
 
+	/*
+	 * This class creates and renders the JTree where our database catalogue is shown and sets the scrollpane for
+	 * the complete list of the databases in the JTree.
+	 */
+	
 	private DBMSModel model;
 	private JScrollPane scrollPane;
 	public static JTree tree;
@@ -15,7 +20,7 @@ public class JTreeAndPane {
 	}
 	private void createPartControl() {
 		tree = new JTree(model.createTreeModel());
-		tree.addTreeSelectionListener(new SelectionListener());//tree.addTreeWillExpandListener(new TreeExpandListener(model));
+		tree.addTreeSelectionListener(new SelectionListener());
 		tree.expandRow(1);
 		tree.setRootVisible(false);
 		tree.setCellRenderer(new DBMSModelStyler(model));
@@ -30,7 +35,6 @@ public class JTreeAndPane {
 	}
 
 	public static void repaintTree(){
-		System.out.println("something");
 		tree.validate();
 		tree.repaint();
 	}
